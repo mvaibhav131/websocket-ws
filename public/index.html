@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+</head>
+<body>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #chatContainer {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #messages {
+            /* flex: 1; */
+            overflow-y: auto;
+            height:450px;
+            width:400px;
+            margin-bottom: 40px;
+            border: 2px solid #ddd;
+            padding: 20px;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+
+        #messageInput {
+            width: calc(100% - 80px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .message.you {
+            background: #e1ffc7;
+            align-self: flex-end;
+        }
+
+        .message.server {
+            background: #f1f1f1;
+            align-self: flex-start;
+        }
+    </style>
+    <h1>WebSocket Client</h1>
+    <div id="messages"></div>
+    <div id="chatContainer">
+        <div style="display: flex;">
+            <input type="text" id="messageInput" placeholder="Type a message">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <script>
+        const ws = new WebSocket('ws://localhost:9000');
+
+        ws.onopen = () => {
+            console.log('Connected to the server');
+        };
+
+        ws.onmessage = (event) => {
+            const messagesDiv = document.getElementById('messages');
+            const message = document.createElement('div');
+            message.classList.add('message', 'server');
+            message.textContent = `Server: ${event.data}`;
+            messagesDiv.appendChild(message);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+
+        ws.onclose = () => {
+            console.log('Disconnected from the server');
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value;
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }else{
+                ws.send(message);
+            }
+
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'you');
+            messageDiv.textContent = `You: ${message}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            input.value = '';
+        }
+    </script>
+</body>
+</html>
