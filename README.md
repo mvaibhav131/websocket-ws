@@ -1,4 +1,4 @@
-# WebSocket Integrations Connection Demonstration.
+# WebSocket Integrations Connection Demo.
 
 ## This Repository demonstrates how to established a WebSocket Connection between server and client using NodeJS and Express.
 
