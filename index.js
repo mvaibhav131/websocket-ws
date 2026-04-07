@@ -18,7 +18,6 @@ webSocketServer.on('connection', (socket) => {
    socket.on("close",() => {console.log("Client Websocket Disconnected")})
 
    // send the Message to the client when the connection is established from the server
-
    socket.send("Server Connected to Client")
 
 });
