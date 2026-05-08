@@ -5,8 +5,9 @@ const webSocketServer = new WebSocket.Server({ port: 9000 });
 webSocketServer.on('connection', (socket) => {
 
     // consoling the client connection message on connection connected
-   console.log('New client connected');
+   console.log('New client connected'); 
 
+    
    socket.on("message", (message) =>{
     // if server receives a message from the client, it will console log it
     console.log(`Received Message to Server: ${message}`);
