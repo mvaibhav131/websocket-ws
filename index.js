@@ -14,6 +14,7 @@ webSocketServer.on('connection', (socket) => {
     // now after the message is received, we will send it back to the client
     socket.send(`Server Received: ${message}`)
    })
+    
    socket.on("error", (err) => {console.log(`Error: ${err}`)})
 
    socket.on("close",() => {console.log("Client Websocket Disconnected")})
