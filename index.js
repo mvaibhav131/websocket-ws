@@ -3,7 +3,6 @@ const WebSocket = require('ws');
 const webSocketServer = new WebSocket.Server({ port: 9000 });
 
 webSocketServer.on('connection', (socket) => {
-
     // consoling the client connection message on connection connected
    console.log('New client connected');
     
