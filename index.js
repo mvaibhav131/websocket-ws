@@ -9,7 +9,6 @@ webSocketServer.on('connection', (socket) => {
    socket.on("message", (message) =>{
     // if server receives a message from the client, it will console log it
     console.log(`Received Message to Server: ${message}`);
-
     // now after the message is received, we will send it back to the client
     socket.send(`Server Received: ${message}`)
    })
