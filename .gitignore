@@ -4,4 +4,5 @@ config
 .docker.yaml
 .env
 .log
+package-lock.json
 
