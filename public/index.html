@@ -1,130 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Client Connection</title>
-</head>
-<body>
+
+    <title>WebSocket Client</title>
+
     <style>
+        /**
+         * Page layout
+         */
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 90vh;
+            min-height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
         }
 
+        /**
+         * Main chat container
+         */
         #chatContainer {
-            width: 100%;
+            width: 90%;
             max-width: 700px;
-            background: white;
+            background-color: white;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            display: flex;
-            flex-direction: column;
         }
 
+        /**
+         * Message display area
+         */
         #messages {
-            /* flex: 1; */
+            height: 400px;
             overflow-y: auto;
-            height:450px;
-            width:400px;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             border: 2px solid #ddd;
-            padding: 20px;
+            padding: 15px;
             border-radius: 4px;
-            background: #fafafa;
+            background-color: #fafafa;
         }
 
+        /**
+         * Input section
+         */
+        #inputContainer {
+            display: flex;
+            gap: 10px;
+        }
+
+        /**
+         * Message input field
+         */
         #messageInput {
-            width: calc(100% - 80px);
+            flex: 1;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin-right: 10px;
+            font-size: 16px;
         }
 
+        /**
+         * Send button
+         */
         button {
             padding: 10px 20px;
             border: none;
-            background: #007bff;
+            background-color: #007bff;
             color: white;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
         }
 
         button:hover {
-            background: #0056b3;
+            background-color: #0056b3;
         }
 
+        /**
+         * Common message styling
+         */
         .message {
             margin-bottom: 10px;
             padding: 10px;
             border-radius: 4px;
         }
 
+        /**
+         * Messages sent by the client
+         */
         .message.you {
-            background: #e1ffc7;
-            align-self: flex-end;
+            background-color: #e1ffc7;
+            text-align: right;
         }
 
+        /**
+         * Messages received from the server
+         */
         .message.server {
-            background: #f1f1f1;
-            align-self: flex-start;
+            background-color: #f1f1f1;
+            text-align: left;
         }
     </style>
+</head>
+
+<body>
+
     <h1>WebSocket Client</h1>
-    <div id="messages"></div>
+
     <div id="chatContainer">
-        <div style="display: flex;">
-            <input type="text" id="messageInput" placeholder="Type a message">
-            <button onclick="sendMessage()">Send</button>
+
+        <!--
+            Displays messages sent by the client
+            and messages received from the server.
+        -->
+        <div id="messages"></div>
+
+        <!--
+            Input field and button used to send
+            messages to the WebSocket server.
+        -->
+        <div id="inputContainer">
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Type a message"
+                autocomplete="off"
+            />
+
+            <button id="sendButton">Send</button>
         </div>
+
     </div>
+
     <script>
-        const ws = new WebSocket('ws://localhost:9000');
+        /**
+         * WebSocket Client
+         *
+         * Creates a connection to the WebSocket server
+         * running locally on port 9000.
+         *
+         * Server:
+         * ws://localhost:9000
+         */
+        const socket = new WebSocket('ws://localhost:9000');
 
-        ws.onopen = () => {
-            console.log('Connected to the server');
-        };
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
 
-        ws.onmessage = (event) => {
-            const messagesDiv = document.getElementById('messages');
-            const message = document.createElement('div');
-            message.classList.add('message', 'server');
-            message.textContent = `Server: ${event.data}`;
-            messagesDiv.appendChild(message);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        };
+        /**
+         * Handle successful WebSocket connection.
+         *
+         * This event is triggered when the client
+         * successfully connects to the server.
+         */
+        socket.addEventListener('open', () => {
+            console.log('Connected to the WebSocket server');
+        });
 
-        ws.onclose = () => {
-            console.log('Disconnected from the server');
-        };
+        /**
+         * Handle messages received from the server.
+         *
+         * Every message received from the server
+         * is displayed in the message container.
+         */
+        socket.addEventListener('message', (event) => {
+            addMessage(`Server: ${event.data}`, 'server');
+        });
 
+        /**
+         * Handle WebSocket errors.
+         *
+         * This event is triggered when a connection
+         * or communication error occurs.
+         */
+        socket.addEventListener('error', (error) => {
+            console.error('WebSocket error:', error);
+        });
+
+        /**
+         * Handle WebSocket disconnection.
+         */
+        socket.addEventListener('close', () => {
+            console.log('Disconnected from the WebSocket server');
+        });
+
+        /**
+         * Send a message to the WebSocket server.
+         */
         function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value;
+            const message = messageInput.value.trim();
+
+            // Do not send empty messages.
             if (!message) {
                 alert('Please enter a message');
                 return;
-            }else{
-                ws.send(message);
             }
 
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', 'you');
-            messageDiv.textContent = `You: ${message}`;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            // Make sure the WebSocket connection is open
+            // before attempting to send the message.
+            if (socket.readyState !== WebSocket.OPEN) {
+                alert('WebSocket is not connected to the server');
+                return;
+            }
 
-            input.value = '';
+            // Send the message to the server.
+            socket.send(message);
+
+            // Display the sent message in the chat window.
+            addMessage(`You: ${message}`, 'you');
+
+            // Clear the input field.
+            messageInput.value = '';
+
+            // Put the cursor back into the input field.
+            messageInput.focus();
         }
+
+        /**
+         * Add a message to the chat window.
+         *
+         * @param {string} text - Message to display.
+         * @param {'you'|'server'} sender - Message sender.
+         */
+        function addMessage(text, sender) {
+            const messageElement = document.createElement('div');
+
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = text;
+
+            messagesContainer.appendChild(messageElement);
+
+            // Automatically scroll to the latest message.
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        /**
+         * Send the message when the user presses Enter.
+         */
+        messageInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        /**
+         * Handle the Send button click.
+         */
+        sendButton.addEventListener('click', sendMessage);
     </script>
+
 </body>
+
 </html>
